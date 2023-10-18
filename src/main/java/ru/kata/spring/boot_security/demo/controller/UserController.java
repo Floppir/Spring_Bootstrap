@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.repository.RoleRepository;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 import ru.kata.spring.boot_security.demo.service.UserServiceImpl;
 
@@ -21,12 +21,12 @@ public class UserController {
 
     private final UserService userService;
 
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
     @Autowired
-    public UserController(UserServiceImpl userService, RoleRepository roleRepository) {
+    public UserController(UserServiceImpl userService, RoleService roleService) {
         this.userService = userService;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     @GetMapping(value = "/admin")
@@ -35,7 +35,7 @@ public class UserController {
         model.addAttribute("userInfo", user1);
         model.addAttribute(userService.findAll());
         model.addAttribute("user", new User());
-        List<Role> roles = roleRepository.findAll();
+        List<Role> roles = roleService.findAll();
         model.addAttribute("allRoles", roles);
 
         return "admin";
@@ -51,14 +51,19 @@ public class UserController {
 
     @PostMapping("/save_user")
     public String saveUser(@ModelAttribute User user) {
-        userService.save(user);
-
+        try {
+            userService.save(user);
+        } catch (RuntimeException ignored) {
+        }
         return "redirect:/admin";
     }
 
     @PostMapping("/update_user")
     public String updateUser(@ModelAttribute User user) {
-        userService.update(user);
+        try {
+            userService.update(user);
+        } catch (RuntimeException ignored) {
+        }
 
         return "redirect:/admin";
     }
